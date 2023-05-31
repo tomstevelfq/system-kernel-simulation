@@ -56,15 +56,21 @@ int Memory::getOneBlock(){//物理内存分配
     if(freeblock==-1){//没有空闲就内存调度
         int phyid=fifo();
         int virid=phyBlock[phyid].virid;
-        phyBlock[phyid].virid=-1;
-        destroyVirBlock(virid);
+        phyBlock[phyid].virid=-1;//清物理表
+        //virtualTable[virid]=-1;//清虚表
+        q.push(phyid);
         return phyid;
     }
+    q.push(freeblock);
     return freeblock;
 }
 void Memory::displayPhyBlock(){
     for(int i=0;i<16;i++){
-        cout<<phyBlock[i].processid<<"("<<i<<")"<<" ";
+        if(phyBlock[i].virid==-1){
+            cout<<"- ";
+        }else{
+            cout<<phyBlock[i].processid<<"("<<phyBlock[i].virid<<")"<<" ";
+        }
     }
     cout<<endl;
 }
@@ -102,8 +108,15 @@ void Memory::memory_alloc(int size,int processid,Process& proc){
 }
 
 void Memory::displayVirtualBlock(){
-    for(int i=0;i<vir_counter;i++){
-        cout<<i<<"  ";
+    int j=0;
+    for(int i=0;i<VBLOCKNUM;i++){
+        if(virtualTable[i]!=-1){
+            cout<<i<<"  ";
+            j++;
+        }
+    }
+    for(;j<VBLOCKNUM;j++){
+        cout<<"- ";
     }
     cout<<endl;
 }

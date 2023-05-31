@@ -7,10 +7,10 @@ Process::Process(Memory* m){
 
 void Process::displayBlockTable(){
     for(int i=0;i<VBLOCKNUM;i++){
-        if(rw[i]==2){
+        if(rw[i]==2||mem->virtualTable[i]==-1){
             cout<<"- ";
         }else{
-            cout<<i<<" ";
+            cout<<mem->virtualTable[i]<<" ";
         }
     }
     cout<<endl;
