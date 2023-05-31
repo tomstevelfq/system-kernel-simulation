@@ -17,10 +17,6 @@ using namespace std;
 #define PBLOCKNUM 16
 
 struct Process{
-    Process(Memory* m){
-        rw=vector<int>(1000,2);//初始化都没有权限
-        mem=m;
-    }
     string name;
     int id=-1;
     int pid=-1;//父进程的id
@@ -28,10 +24,13 @@ struct Process{
     int line=0;//当前进程执行到哪一行
     vector<string> code;//存储代码
     set<int> allocid;  //alloc_id集合
-    Memory *mem;
+    struct Memory *mem;
     
+    Process(struct Memory* m);
     void displayBlockTable();
 
     string excute();
+
+    void display();
 };
 #endif

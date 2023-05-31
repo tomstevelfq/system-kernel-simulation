@@ -28,6 +28,7 @@ void Process::displayBlockTable(){
 
 string Process::excute(){//执行完成返回false
     while(line<code.size()){//循环执行指令
+        display();//展示内存情况
         stringstream ss(code[line++]);
         string cmd1;
         ss>>cmd1;
@@ -38,8 +39,6 @@ string Process::excute(){//执行完成返回false
                 break;
             }
         }else{
-            string cmd2;
-            ss>>cmd2;
             int blockid;
             int num;
             string program;
@@ -90,4 +89,11 @@ string Process::excute(){//执行完成返回false
         }
     }
     return "";
+}
+
+void Process::display(){
+    //展示内存情况
+    mem->displayPhyBlock();
+    mem->displayVirtualBlock();
+    displayBlockTable();
 }

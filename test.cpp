@@ -9,13 +9,13 @@ int main(){
     map<string,vector<string>> mp;
     map<int,string> m2;
     map<int,Process*> mpid;
-    mp["init"]={"memory_allocate 16","fork_and_exec program1","wait","memory_read 10","memory_write 10","memory_read 0","exit"};
+    mp.insert({"init",{"memory_allocate 16","fork_and_exec program1","wait","memory_read 10","memory_write 10","memory_read 0","exit"}});
     mp["program1"]={"memory_read 0","memory_write 0","memory_allocate 2","memory_release 1","memory_allocate 3","memory_release 0","memory_allocate 2","exit"};
-    Memory mem;
     Process proc1(&mem);
     int curprocessid=0;
     proc1.id=curprocessid++;
     proc1.pid=-1;
+    proc1.code=mp["init"];
     Process *p=&proc1;
     mpid.insert({curprocessid,&proc1});
     while(true){
@@ -37,9 +37,6 @@ int main(){
       }
     }
 
-    //展示内存情况
-    mem.displayPhyBlock();
-    mem.displayVirtualBlock();
-    p->displayBlockTable();
+    p->display();
     return 0;
 }
