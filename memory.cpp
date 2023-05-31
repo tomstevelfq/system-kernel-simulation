@@ -52,14 +52,15 @@ void Memory::setProcessId(int phyid,int processid){//物理内存所属进程号
 }
 
 int Memory::getOneBlock(){//物理内存分配
-    if(remain==0){//没有空闲就内存调度
+    int freeblock=getFreeBlock();
+    if(freeblock==-1){//没有空闲就内存调度
         int phyid=fifo();
         int virid=phyBlock[phyid].virid;
         phyBlock[phyid].virid=-1;
         destroyVirBlock(virid);
         return phyid;
     }
-    return getFreeBlock();
+    return freeblock;
 }
 void Memory::displayPhyBlock(){
     for(int i=0;i<16;i++){
@@ -74,15 +75,17 @@ void Memory::destroyVirBlock(int id){//删除一块虚存
     }
 }
 
-void Memory::releaseVirtualBlock(int virid){
+void Memory::releaseVirtualBlock(int virid,struct Process& process){
     int phy_id=virtualTable[virid];
     virtualTable[virid]=-1;
-    destroyVirBlock(phy_id);//销毁物理内存中的虚拟内存占用
+    if(process.rw[virid]==1){//拥有控制权
+        destroyVirBlock(phy_id);//销毁物理内存中的虚拟内存占用
+    }
 }
 
-void Memory::memory_release(int id){//释放该alloc_id下的所有块
-    for(auto it:alloc[id]){
-        releaseVirtualBlock(it);
+void Memory::memory_release(int allocid,struct Process& process){//释放该alloc_id下的所有块
+    for(auto it:alloc[allocid]){
+        releaseVirtualBlock(it,process);
     }
 }
 
@@ -90,8 +93,9 @@ void Memory::memory_alloc(int size,int processid,Process& proc){
     for(int i=0;i<size;i++){
         int phy_id=getOneBlock();
         setProcessId(phy_id,processid);
-        loadVirBlock(vir_counter++,phy_id);
+        proc.rw[vir_counter]=1;//权限W
         alloc[alloc_id].insert(vir_counter);
+        loadVirBlock(vir_counter++,phy_id);
     }
     proc.allocid.insert(alloc_id);
     alloc_id++;

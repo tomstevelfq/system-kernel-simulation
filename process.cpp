@@ -55,7 +55,7 @@ string Process::excute(){//执行完成返回false
                 }
             }else if(cmd1=="memory_write"){
                 ss>>blockid;
-                if(rw[blockid]==0){
+                if(rw[blockid]==1){
                     cout<<"write ok"<<endl;
                 }else{
                     int phy_id=mem->getOneBlock();
@@ -70,11 +70,11 @@ string Process::excute(){//执行完成返回false
                 cout<<"分配内存"<<endl;
             }else if(cmd1=="memory_release"){
                 ss>>num;
-                mem->memory_release(num);
+                mem->memory_release(num,*this);
                 cout<<"释放内存"<<endl;
             }else if(cmd1=="memory_release"){
                 ss>>num;
-                mem->memory_release(num);
+                mem->memory_release(num,*this);
                 cout<<"释放内存"<<endl;
             }else if(cmd1=="fork_and_exec"){
                 ss>>program;
@@ -96,4 +96,14 @@ void Process::display(){
     mem->displayPhyBlock();
     mem->displayVirtualBlock();
     displayBlockTable();
+}
+
+void Process::fork(Process* par){
+    pid=par->id;
+    allocid=par->allocid;
+    for(auto it:allocid){
+        for(auto itt:mem->alloc[it]){
+            rw[itt]=0;//继承为读权限
+        }
+    }
 }

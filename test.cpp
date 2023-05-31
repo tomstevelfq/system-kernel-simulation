@@ -29,10 +29,10 @@ int main(){
         }
       }else{//执行新的程序
         Process* pro=new Process(&mem);
-        pro->pid=p->id;
         pro->code=mp[ret];
         pro->id=curprocessid++;
         mpid.insert({curprocessid,pro});
+        pro->fork(p);
         p=pro;
       }
     }

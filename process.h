@@ -32,5 +32,7 @@ struct Process{
     string excute();
 
     void display();
+
+    void fork(Process* par);
 };
 #endif

@@ -52,9 +52,9 @@ struct Memory{//内存管理结构体
 
     void destroyVirBlock(int id);
 
-    void releaseVirtualBlock(int virid);
+    void releaseVirtualBlock(int virid,struct Process& process);
 
-    void memory_release(int id);
+    void memory_release(int allocid,struct Process& process);
 
     void memory_alloc(int size,int processid,struct Process& proc);
 
