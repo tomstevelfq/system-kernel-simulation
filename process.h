@@ -1,3 +1,5 @@
+#ifndef PROCESS_H
+#define PROCESS_H
 #include<iostream>
 #include<queue>
 #include<list>
@@ -19,6 +21,7 @@ struct Process{
         rw=vector<int>(1000,2);//初始化都没有权限
         mem=m;
     }
+    string name;
     int id=-1;
     int pid=-1;//父进程的id
     vector<int> rw;//对虚拟内存的权限
@@ -29,5 +32,6 @@ struct Process{
     
     void displayBlockTable();
 
-    void excute();
+    string excute();
 };
+#endif

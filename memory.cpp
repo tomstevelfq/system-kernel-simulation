@@ -45,6 +45,7 @@ int Memory::getFreeBlock(){//获取一块空闲物理内存
 
 void Memory::loadVirBlock(int virid,int phyid){//载入虚存到物理存
     phyBlock[phyid].virid=virid;
+    virtualTable[virid]=phyid;
 }
 void Memory::setProcessId(int phyid,int processid){//物理内存所属进程号
     phyBlock[phyid].processid=processid;
@@ -109,18 +110,3 @@ void Memory::displayVirtualBlock(){
 //     displayBlockTable();
 // }
 
-int main(){
-    code={//测试代码
-        {"memory_allocate 16","fork_and_exec program1","wait","memory_read 10","memory_write 10","memory_read 0","exit"},
-        {"memory_read 0","memory_write 0","memory_allocate 2","memory_release 1","memory_allocate 3","memory_release 0","memory_allocate 2","exit"}
-    };
-    codePos.push_back(0);
-    codePos.push_back(0);
-    parent.push_back(-1);//-1表示进程未使用或者父进程是init进程，是起始进程
-    parent.push_back(-1);
-    string str;
-    while(excute()){
-        display();
-    }
-    return 0;
-}
