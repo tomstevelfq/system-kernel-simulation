@@ -9,6 +9,7 @@ Cycle::Cycle(){
 }
 
 void Cycle::init(){
+
 }
 
 void Cycle::start(){
@@ -19,7 +20,8 @@ void Cycle::start(){
     mpid.insert({proc1.id,&proc1});
 
     while(true){
-      auto ret=p->excute();
+      cyclePrint(*p);
+      auto ret=p->excute(cycleCounter);
       if(ret.first==""){//程序正常退出
         continue;
       }else if(ret.first=="exit"){
@@ -28,31 +30,41 @@ void Cycle::start(){
           break;
         }else{
           p=mpid[p->pid];
+          state=1;
+          kernel->state=1;
         }
       }else if(ret.first=="read"){
         kernel->allocRead(ret.second,*p);
+        state=1;
+        kernel->state=4;
       }else if(ret.first=="write"){
         kernel->allocWrite(ret.second,*p);
+        state=1;
+        kernel->state=4;
       }else if(ret.first=="alloc"){
-        if(p->pid==-1){
-          cout<<"执行完毕"<<endl;
-          break;
-        }else{
-          p=mpid[p->pid];
-        }
+        kernel->allocSize(ret.second,*p);
+        state=1;
+        kernel->state=1;
       }else if(ret.first=="release"){
-        if(p->pid==-1){
-          cout<<"执行完毕"<<endl;
-          break;
-        }else{
-          p=mpid[p->pid];
-        }
+        kernel->releaseSize(ret.second,*p);
+        state=1;
+        kernel->state=1;
       }else{//执行新的程序
         Process* pro=new Process(mem);
         pro->code=mp[ret.first];
         mpid.insert({pro->id,pro});
         pro->fork(p);
         p=pro;
+        state=1;
+        kernel->state=1;
       }
+    }
+}
+
+void Cycle::cyclePrint(Process& proc){
+    if(state){
+        kernel->kernelPrint(cycleCounter,proc,*this);
+    }else{
+        proc.processPrint(cycleCounter);
     }
 }

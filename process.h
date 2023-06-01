@@ -10,6 +10,7 @@
 #include<map>
 #include<sstream>
 #include"memory.h"
+#include"cycle.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ using namespace std;
 #define PBLOCKNUM 16
 
 struct Process{
+    static int idcounter;
     int state;//进程状态  1 2 3 4 5
     string name;
     int id=-1;
@@ -32,13 +34,13 @@ struct Process{
     Process(struct Memory* m);
     void displayBlockTable();
 
-    string excute();
-
-    pair<string,int> excute();
+    pair<string,int> excute(int counter);
 
     void display();
 
     void fork(Process* par);
+
+    void processPrint(int counter);
 };
 
 struct Kernel{

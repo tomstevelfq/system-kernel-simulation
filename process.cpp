@@ -11,6 +11,7 @@ Process::Process(Memory* m){
 int Process::idcounter=0;
 
 void Process::displayBlockTable(){
+    cout<<"6.page table:"<<endl;
     for(int i=0;i<VBLOCKNUM;i++){
         if(rw[i]==2){
             cout<<"- ";
@@ -43,12 +44,12 @@ void Process::displayBlockTable(){
     cout<<endl;
 }
 
-pair<string,int> Process::excute(){//执行完成返回false
+pair<string,int> Process::excute(int counter){//执行完成返回false
     if(line>=code.size()){
         return {"exit",-1};
     }
     while(line<code.size()){//循环执行指令
-        display();//展示内存情况
+        processPrint(counter);//输出打印
         stringstream ss(code[line++]);
         string cmd1;
         ss>>cmd1;
@@ -131,4 +132,12 @@ void Process::fork(Process* par){
             rw[itt]=0;//继承为读权限
         }
     }
+}
+
+void Process::processPrint(int counter){
+    cout<<"[cycle #"<<counter<<"]"<<endl;
+    cout<<"1.mode: user"<<endl;
+    cout<<"2.comand: "<<code[line]<<endl;
+    cout<<"3.running: "<<id<<"("<<name<<","<<pid<<")"<<endl;
+    display();
 }

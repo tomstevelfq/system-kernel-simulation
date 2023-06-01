@@ -66,6 +66,7 @@ int Memory::getOneBlock(){//物理内存分配
     return freeblock;
 }
 void Memory::displayPhyBlock(){
+    cout<<"4.physical memory:"<<endl;
     for(int i=0;i<16;i++){
         if(phyBlock[i].virid==-1){
             cout<<"- ";
@@ -115,6 +116,7 @@ void Memory::memory_alloc(int size,int processid,Process& proc){
 }
 
 void Memory::displayVirtualBlock(Process& proc){
+    cout<<"5.virtual memory:"<<endl;
     for(int i=0;i<VBLOCKNUM;i++){
         if(proc.rw[i]!=2){
             cout<<proc.virtualId[i]<<"  ";
