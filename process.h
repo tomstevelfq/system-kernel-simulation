@@ -17,6 +17,7 @@ using namespace std;
 #define PBLOCKNUM 16
 
 struct Process{
+    int state;//进程状态  1 2 3 4 5
     string name;
     int id=-1;
     int pid=-1;//父进程的id
@@ -26,14 +27,22 @@ struct Process{
     set<int> allocid;  //alloc_id集合
     vector<int> virtualId;//进程中virtualtable pos到虚存id的映射
     struct Memory *mem;
+    vector<struct Node> virtualTable;
     
     Process(struct Memory* m);
     void displayBlockTable();
 
     string excute();
 
+    pair<string,int> excute();
+
     void display();
 
     void fork(Process* par);
+};
+
+struct Kernel{
+    int mode=0;//0用户态  1内核态
+    int operate=0;
 };
 #endif

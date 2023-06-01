@@ -5,7 +5,10 @@ Process::Process(Memory* m){
     virtualId=vector<int>(VBLOCKNUM,-1);
     virtualTable=vector<Node>(VBLOCKNUM,Node());
     mem=m;
+    id=idcounter++;
 }
+
+int Process::idcounter=0;
 
 void Process::displayBlockTable(){
     for(int i=0;i<VBLOCKNUM;i++){
@@ -27,7 +30,11 @@ void Process::displayBlockTable(){
             if(rw[i]==0){
                 cout<<"R ";
             }else if(rw[i]==1){
-                cout<<"W ";
+                if(mem->phyBlock[virtualTable[i].phy_id].processid==id){
+                    cout<<"W ";
+                }else{
+                    cout<<"- ";
+                }
             }else{
                 cout<<"- ";
             }
@@ -36,7 +43,10 @@ void Process::displayBlockTable(){
     cout<<endl;
 }
 
-string Process::excute(){//执行完成返回false
+pair<string,int> Process::excute(){//执行完成返回false
+    if(line>=code.size()){
+        return {"exit",-1};
+    }
     while(line<code.size()){//循环执行指令
         display();//展示内存情况
         stringstream ss(code[line++]);
@@ -44,6 +54,7 @@ string Process::excute(){//执行完成返回false
         ss>>cmd1;
         if(cmd1=="wait"){
             cout<<"wait"<<endl;
+            break;
         }else if(cmd1=="exit"){
             if(pid==-1){
                 break;
@@ -56,49 +67,52 @@ string Process::excute(){//执行完成返回false
                 ss>>blockid;
                 if(rw[blockid]!=2&&virtualTable[blockid].phy_id!=-1){
                     cout<<"read ok"<<endl;
+                    break;
                 }else{
-                    int phy_id=mem->getOneBlock();
-                    mem->setProcessId(phy_id,id);
-                    mem->loadVirBlock(blockid,phy_id,*this);
-                    cout<<"分配读物理内存"<<endl;
-                    rw[blockid]=1;
+                    // int phy_id=mem->getOneBlock();
+                    // mem->setProcessId(phy_id,id);
+                    // mem->loadVirBlock(blockid,phy_id,*this);
+                    // cout<<"分配读物理内存"<<endl;
+                    // rw[blockid]=1;
+                    return {"read",blockid};
                 }
             }else if(cmd1=="memory_write"){
                 ss>>blockid;
                 if(rw[blockid]==1){
                     cout<<"write ok"<<endl;
+                    break;
                 }else{
-                    int phy_id=mem->getOneBlock();
-                    mem->setProcessId(phy_id,id);
-                    mem->loadVirBlock(blockid,phy_id,*this);
-                    cout<<"分配写物理内存"<<endl;
-                    rw[blockid]=1;
+                    // int phy_id=mem->getOneBlock();
+                    // mem->setProcessId(phy_id,id);
+                    // mem->loadVirBlock(blockid,phy_id,*this);
+                    // cout<<"分配写物理内存"<<endl;
+                    // rw[blockid]=1;
+                    return {"write",blockid};
                 }
             }else if(cmd1=="memory_allocate"){
                 ss>>num;
-                mem->memory_alloc(num,id,*this);
-                cout<<"分配内存"<<endl;
+                // mem->memory_alloc(num,id,*this);
+                // cout<<"分配内存"<<endl;
+                return {"alloc",num};
             }else if(cmd1=="memory_release"){
                 ss>>num;
-                mem->memory_release(num,*this);
-                cout<<"释放内存"<<endl;
-            }else if(cmd1=="memory_release"){
-                ss>>num;
-                mem->memory_release(num,*this);
-                cout<<"释放内存"<<endl;
+                // mem->memory_release(num,*this);
+                // cout<<"释放内存"<<endl;
+                return {"release",num};
             }else if(cmd1=="fork_and_exec"){
                 ss>>program;
                 cout<<"调用程序"<<endl;
-                return program;
+                return {program,-1};
             }else if(cmd1=="exit"){
-                return "";
+                return {"exit",-1};
             }else{
                 cout<<"excute error"<<endl;
                 exit(-1);
+                return {"error",-1};
             }
         }
     }
-    return "";
+    return {"",-1};
 }
 
 void Process::display(){

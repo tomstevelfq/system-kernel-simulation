@@ -46,7 +46,7 @@ struct Memory{//内存管理结构体
 
     int getFreeBlock();
 
-    void loadVirBlock(int virid,int phyid);
+    void loadVirBlock(int virid,int phyid,struct Process& proc);
     void setProcessId(int phyid,int processid);
 
     int getOneBlock();
