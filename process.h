@@ -24,6 +24,7 @@ struct Process{
     int line=0;//当前进程执行到哪一行
     vector<string> code;//存储代码
     set<int> allocid;  //alloc_id集合
+    vector<int> virtualId;//进程中virtualtable pos到虚存id的映射
     struct Memory *mem;
     
     Process(struct Memory* m);

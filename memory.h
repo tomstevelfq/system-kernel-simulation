@@ -19,7 +19,8 @@ using namespace std;
 struct Node{
     Node();
     int phy_id;//物理块id 为-1表示没分配
-    int rw=1;//读写权限  0读  1写  2没有权限
+    int rw=2;//读写权限  0读  1写  2没有权限
+    int vid=-1;//虚拟内存id是多少
 };
 
 struct pNode{
@@ -34,6 +35,7 @@ struct Memory{//内存管理结构体
     int curProcess=0;//当前进程号
     map<int,set<int>> alloc;//alloc id集合   键为alloc id值为分配的虚拟内存id集合
     vector<int> virtualTable;//虚拟内存表
+    vector<int> virtualId;//虚拟编号表
     vector<pNode> phyBlock;//物理内存  对应的virid为-1表示没有
     int remain=16;//剩余物理内存
     queue<int> q;//FIFO队列
@@ -58,6 +60,8 @@ struct Memory{//内存管理结构体
 
     void memory_alloc(int size,int processid,struct Process& proc);
 
-    void displayVirtualBlock();
+    void displayVirtualBlock(Process& proc);
+
+    int getFreeVirPos(Process& proc);
 };
 #endif

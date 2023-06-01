@@ -13,11 +13,11 @@ int main(){
     mp["program1"]={"memory_read 0","memory_write 0","memory_allocate 2","memory_release 1","memory_allocate 3","memory_release 0","memory_allocate 2","exit"};
     Process proc1(&mem);
     int curprocessid=0;
-    proc1.id=curprocessid++;
+    proc1.id=curprocessid;
     proc1.pid=-1;
     proc1.code=mp["init"];
     Process *p=&proc1;
-    mpid.insert({curprocessid,&proc1});
+    mpid.insert({curprocessid++,&proc1});
     while(true){
       string ret=p->excute();
       if(ret==""){//程序正常退出
@@ -30,8 +30,8 @@ int main(){
       }else{//执行新的程序
         Process* pro=new Process(&mem);
         pro->code=mp[ret];
-        pro->id=curprocessid++;
-        mpid.insert({curprocessid,pro});
+        pro->id=curprocessid;
+        mpid.insert({curprocessid++,pro});
         pro->fork(p);
         p=pro;
       }

@@ -26,6 +26,7 @@ pNode::pNode(){
 Memory::Memory(){
     phyBlock=vector<pNode>(PBLOCKNUM,pNode());//物理块到虚拟块的映射
     virtualTable=vector<int>(VBLOCKNUM,-1);//虚拟块到物理块的映射 为-1表示没有
+    virtualId=vector<int>(VBLOCKNUM,-1);
 }
 
 int Memory::fifo(){//分配一个fifo块
@@ -43,9 +44,9 @@ int Memory::getFreeBlock(){//获取一块空闲物理内存
     return -1;
 }
 
-void Memory::loadVirBlock(int virid,int phyid){//载入虚存到物理存
+void Memory::loadVirBlock(int virid,int phyid,Process& proc){//载入虚存到物理存
     phyBlock[phyid].virid=virid;
-    virtualTable[virid]=phyid;
+    proc.virtualTable[virid].phy_id=phyid;
 }
 void Memory::setProcessId(int phyid,int processid){//物理内存所属进程号
     phyBlock[phyid].processid=processid;
@@ -82,8 +83,9 @@ void Memory::destroyVirBlock(int id){//删除一块虚存
 }
 
 void Memory::releaseVirtualBlock(int virid,struct Process& process){
-    int phy_id=virtualTable[virid];
-    virtualTable[virid]=-1;
+    int phy_id=process.virtualTable[virid].phy_id;
+    process.virtualTable[virid].phy_id=-1;
+    process.virtualId[virid]=-1;
     if(process.rw[virid]==1){//拥有控制权
         destroyVirBlock(phy_id);//销毁物理内存中的虚拟内存占用
     }
@@ -91,7 +93,10 @@ void Memory::releaseVirtualBlock(int virid,struct Process& process){
 
 void Memory::memory_release(int allocid,struct Process& process){//释放该alloc_id下的所有块
     for(auto it:alloc[allocid]){
-        releaseVirtualBlock(it,process);
+        if(process.rw[it]==1){
+            releaseVirtualBlock(it,process);
+        }
+        process.rw[it]=2;
     }
 }
 
@@ -99,27 +104,35 @@ void Memory::memory_alloc(int size,int processid,Process& proc){
     for(int i=0;i<size;i++){
         int phy_id=getOneBlock();
         setProcessId(phy_id,processid);
-        proc.rw[vir_counter]=1;//权限W
-        alloc[alloc_id].insert(vir_counter);
-        loadVirBlock(vir_counter++,phy_id);
+        int virpos=getFreeVirPos(proc);
+        proc.virtualId[virpos]=vir_counter++;
+        proc.rw[virpos]=1;//权限W
+        alloc[alloc_id].insert(virpos);
+        loadVirBlock(virpos,phy_id,proc);
     }
     proc.allocid.insert(alloc_id);
     alloc_id++;
 }
 
-void Memory::displayVirtualBlock(){
-    int j=0;
+void Memory::displayVirtualBlock(Process& proc){
     for(int i=0;i<VBLOCKNUM;i++){
-        if(virtualTable[i]!=-1){
-            cout<<i<<"  ";
-            j++;
+        if(proc.rw[i]!=2){
+            cout<<proc.virtualId[i]<<"  ";
+        }else{
+            cout<<"- ";
         }
-    }
-    for(;j<VBLOCKNUM;j++){
-        cout<<"- ";
     }
     cout<<endl;
 }
+
+int Memory::getFreeVirPos(Process& proc){//虚表中的空闲位置
+        for(int i=0;i<VBLOCKNUM;i++){
+            if(proc.rw[i]==2){
+                return i;
+            }
+        }
+        return -1;
+    }
 
 // void display(){
 //     displayVirtualBlock();

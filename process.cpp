@@ -2,25 +2,35 @@
 
 Process::Process(Memory* m){
     rw=vector<int>(1000,2);//初始化都没有权限
+    virtualId=vector<int>(VBLOCKNUM,-1);
+    virtualTable=vector<Node>(VBLOCKNUM,Node());
     mem=m;
 }
 
 void Process::displayBlockTable(){
     for(int i=0;i<VBLOCKNUM;i++){
-        if(rw[i]==2||mem->virtualTable[i]==-1){
+        if(rw[i]==2){
             cout<<"- ";
         }else{
-            cout<<mem->virtualTable[i]<<" ";
+            if(i==mem->phyBlock[virtualTable[i].phy_id].virid){
+                cout<<virtualTable[i].phy_id<<" ";
+            }else{
+                cout<<"- ";
+            }
         }
     }
     cout<<endl;
     for(int i=0;i<VBLOCKNUM;i++){
-        if(rw[i]==0){
-            cout<<"R ";
-        }else if(rw[i]==1){
-            cout<<"W ";
-        }else{
+        if(rw[i]==2||virtualTable[i].phy_id==-1){
             cout<<"- ";
+        }else{
+            if(rw[i]==0){
+                cout<<"R ";
+            }else if(rw[i]==1){
+                cout<<"W ";
+            }else{
+                cout<<"- ";
+            }
         }
     }
     cout<<endl;
@@ -44,12 +54,12 @@ string Process::excute(){//执行完成返回false
             string program;
             if(cmd1=="memory_read"){
                 ss>>blockid;
-                if(rw[blockid]!=2&&mem->virtualTable[blockid]!=-1){
+                if(rw[blockid]!=2&&virtualTable[blockid].phy_id!=-1){
                     cout<<"read ok"<<endl;
                 }else{
                     int phy_id=mem->getOneBlock();
                     mem->setProcessId(phy_id,id);
-                    mem->loadVirBlock(blockid,phy_id);
+                    mem->loadVirBlock(blockid,phy_id,*this);
                     cout<<"分配读物理内存"<<endl;
                     rw[blockid]=1;
                 }
@@ -60,7 +70,7 @@ string Process::excute(){//执行完成返回false
                 }else{
                     int phy_id=mem->getOneBlock();
                     mem->setProcessId(phy_id,id);
-                    mem->loadVirBlock(blockid,phy_id);
+                    mem->loadVirBlock(blockid,phy_id,*this);
                     cout<<"分配写物理内存"<<endl;
                     rw[blockid]=1;
                 }
@@ -94,13 +104,14 @@ string Process::excute(){//执行完成返回false
 void Process::display(){
     //展示内存情况
     mem->displayPhyBlock();
-    mem->displayVirtualBlock();
+    mem->displayVirtualBlock(*this);
     displayBlockTable();
 }
 
 void Process::fork(Process* par){
     pid=par->id;
     allocid=par->allocid;
+    virtualTable=par->virtualTable;//继承虚函数表
     for(auto it:allocid){
         for(auto itt:mem->alloc[it]){
             rw[itt]=0;//继承为读权限
