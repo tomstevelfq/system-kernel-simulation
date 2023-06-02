@@ -1,63 +1,102 @@
 #include"cycle.h"
+#include<fstream>
+#include <filesystem>
 
 Cycle::Cycle(){
-    mem=new Memory();
+    mem=new FIFOMemory();
     kernel=new Kernel(mem);
     process=new Process(mem);
-    mp.insert({"init",{"memory_allocate 16","fork_and_exec program1","wait","memory_read 10","memory_write 10","memory_read 0","exit"}});
-    mp["program1"]={"memory_read 0","memory_write 0","memory_allocate 2","memory_release 1","memory_allocate 3","memory_release 0","memory_allocate 2","exit"};
+    mem->mpid=&mpid;
 }
 
 void Cycle::init(){
-
+  //读文件里面的代码
+  string path="test";
+  for(const auto& file:filesystem::directory_iterator(path)){
+    ifstream ifile(file.path());
+    string name=file.path().filename().string();
+    string line;
+    vector<string> v;
+    while(getline(ifile,line)){
+      v.push_back(line);
+    }
+    mp[name]=v;
+  }
+  return;
 }
 
 void Cycle::start(){
-    Process proc1(mem);
-    proc1.pid=-1;
-    proc1.code=mp["init"];
-    Process *p=&proc1;
-    mpid.insert({proc1.id,&proc1});
-
-    while(true){
-      cyclePrint(*p);
-      auto ret=p->excute(cycleCounter);
-      if(ret.first==""){//程序正常退出
+    init();
+    process->pid=0;
+    process->name="init";
+    process->code=mp["init"];
+    q.push(process);
+    mpid.insert({process->id,process});
+    Process* p;
+    while(!q.empty()){
+      if(cycleCounter==38){
+        cout<<"df"<<endl;
+      }
+      p=q.front();
+      if(p->isDead()){
+        q.pop();
         continue;
-      }else if(ret.first=="exit"){
-        if(p->pid==-1){
-          cout<<"执行完毕"<<endl;
-          break;
-        }else{
-          p=mpid[p->pid];
+      }
+      if(state){
+        kernel->kernelPrint(cycleCounter,*p,*this);
+      }else{
+        auto ret=p->excute(cycleCounter);
+        if(ret.first==""){
+          cycleCounter++;
+          continue;
+        }else if(ret.first=="exit"){
+          if(p->pid==0){
+            cycleCounter++;
+            kernel->state=1;
+            kernel->kernelPrint(cycleCounter,*p,*this);
+            cout<<"执行完毕"<<endl;
+            q.pop();
+            break;
+          }else{
+            q.pop();
+            state=1;
+            kernel->state=1;
+          }
+        }else if(ret.first=="read"){
+          kernel->allocRead(ret.second,*p);
+          state=1;
+          kernel->state=4;
+        }else if(ret.first=="write"){
+          kernel->allocWrite(ret.second,*p);
+          state=1;
+          kernel->state=4;
+        }else if(ret.first=="alloc"){
+          kernel->allocSize(ret.second,*p);
           state=1;
           kernel->state=1;
+        }else if(ret.first=="release"){
+          kernel->releaseSize(ret.second,*p);
+          state=1;
+          kernel->state=1;
+        }else if(ret.first=="wait"){
+          state=1;
+          kernel->state=1;
+          q.push(p);
+          q.pop();
+        }else{//执行新的程序
+          Process* pro=new Process(mem);
+          pro->name=ret.first;
+          pro->code=mp[ret.first];
+          mpid.insert({pro->id,pro});
+          pro->fork(p);
+          p=pro;
+          state=1;
+          kernel->state=1;
+          q.push(p);
+          q.push(pro);
         }
-      }else if(ret.first=="read"){
-        kernel->allocRead(ret.second,*p);
-        state=1;
-        kernel->state=4;
-      }else if(ret.first=="write"){
-        kernel->allocWrite(ret.second,*p);
-        state=1;
-        kernel->state=4;
-      }else if(ret.first=="alloc"){
-        kernel->allocSize(ret.second,*p);
-        state=1;
-        kernel->state=1;
-      }else if(ret.first=="release"){
-        kernel->releaseSize(ret.second,*p);
-        state=1;
-        kernel->state=1;
-      }else{//执行新的程序
-        Process* pro=new Process(mem);
-        pro->code=mp[ret.first];
-        mpid.insert({pro->id,pro});
-        pro->fork(p);
-        p=pro;
-        state=1;
-        kernel->state=1;
       }
+      cycleCounter++;
     }
 }
 

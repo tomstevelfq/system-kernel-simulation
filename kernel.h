@@ -3,20 +3,21 @@
 #include"memory.h"
 #include"process.h"
 #include"cycle.h"
+#include<map>
 
 struct Kernel{
     int cycleCounter=0;
-    Memory* mem;
+    struct Memory* mem;
     int state=0;
-    Kernel(Memory* m);
-    void allocRead(int blockid,Process& proc);
-    void allocWrite(int blockid,Process& proc);
-    void allocSize(int num,Process& proc);
-    void releaseSize(int num,Process& proc);
+    Kernel(struct Memory* m);
+    void allocRead(int blockid,struct Process& proc);
+    void allocWrite(int blockid,struct Process& proc);
+    void allocSize(int num,struct Process& proc);
+    void releaseSize(int num,struct Process& proc);
     // void boot(Process& proc);
     // void syscall();
     // void schedule();
     // void idle();
-    void kernelPrint(int counter,Process &proc,Cycle& cycle);
+    void kernelPrint(int counter,struct Process &proc,struct Cycle& cycle);
 };
 #endif

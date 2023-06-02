@@ -8,7 +8,7 @@ Process::Process(Memory* m){
     id=idcounter++;
 }
 
-int Process::idcounter=0;
+int Process::idcounter=1;
 
 void Process::displayBlockTable(){
     cout<<"6.page table:"<<endl;
@@ -22,6 +22,9 @@ void Process::displayBlockTable(){
                 cout<<"- ";
             }
         }
+        if((i+1)%4==0){
+            cout<<"|";
+        }
     }
     cout<<endl;
     for(int i=0;i<VBLOCKNUM;i++){
@@ -31,14 +34,18 @@ void Process::displayBlockTable(){
             if(rw[i]==0){
                 cout<<"R ";
             }else if(rw[i]==1){
-                if(mem->phyBlock[virtualTable[i].phy_id].processid==id){
-                    cout<<"W ";
-                }else{
-                    cout<<"- ";
-                }
+                cout<<"W ";
+                // if(mem->phyBlock[virtualTable[i].phy_id].processid==id){
+                //     cout<<"W ";
+                // }else{
+                //     cout<<"- ";
+                // }
             }else{
                 cout<<"- ";
             }
+        }
+        if((i+1)%4==0){
+            cout<<"|";
         }
     }
     cout<<endl;
@@ -53,20 +60,18 @@ pair<string,int> Process::excute(int counter){//执行完成返回false
         stringstream ss(code[line++]);
         string cmd1;
         ss>>cmd1;
-        if(cmd1=="wait"){
-            cout<<"wait"<<endl;
-            break;
-        }else if(cmd1=="exit"){
-            if(pid==-1){
-                break;
-            }
+        if(cmd1=="exit"){
+            state=5;
+            destroyStorage();
+            return {"exit",-1};
         }else{
             int blockid;
             int num;
             string program;
             if(cmd1=="memory_read"){
                 ss>>blockid;
-                if(rw[blockid]!=2&&virtualTable[blockid].phy_id!=-1){
+                int phid=virtualTable[blockid].phy_id;
+                if(rw[blockid]!=2&&phid!=-1&&mem->phyBlock[phid].virid==blockid){
                     cout<<"read ok"<<endl;
                     break;
                 }else{
@@ -104,8 +109,8 @@ pair<string,int> Process::excute(int counter){//执行完成返回false
                 ss>>program;
                 cout<<"调用程序"<<endl;
                 return {program,-1};
-            }else if(cmd1=="exit"){
-                return {"exit",-1};
+            }else if(cmd1=="wait"){
+                return {"wait",-1};
             }else{
                 cout<<"excute error"<<endl;
                 exit(-1);
@@ -127,6 +132,7 @@ void Process::fork(Process* par){
     pid=par->id;
     allocid=par->allocid;
     virtualTable=par->virtualTable;//继承虚函数表
+    virtualId=par->virtualId;
     for(auto it:allocid){
         for(auto itt:mem->alloc[it]){
             rw[itt]=0;//继承为读权限
@@ -140,4 +146,16 @@ void Process::processPrint(int counter){
     cout<<"2.comand: "<<code[line]<<endl;
     cout<<"3.running: "<<id<<"("<<name<<","<<pid<<")"<<endl;
     display();
+}
+
+bool Process::isDead(){
+    return state==5;
+}
+
+void Process::destroyStorage(){
+    for(int i=0;i<VBLOCKNUM;i++){
+        if(rw[i]==1){
+            mem->phyBlock[virtualTable[i].phy_id].virid=-1;
+        }
+    }
 }

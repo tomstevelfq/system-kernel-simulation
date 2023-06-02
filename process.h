@@ -19,7 +19,7 @@ using namespace std;
 
 struct Process{
     static int idcounter;
-    int state;//进程状态  1 2 3 4 5
+    int state=1;//进程状态  1 2 3 4 5
     string name;
     int id=-1;
     int pid=-1;//父进程的id
@@ -41,10 +41,9 @@ struct Process{
     void fork(Process* par);
 
     void processPrint(int counter);
-};
 
-struct Kernel{
-    int mode=0;//0用户态  1内核态
-    int operate=0;
+    bool isDead();
+
+    void destroyStorage();
 };
 #endif

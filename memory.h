@@ -10,6 +10,7 @@
 #include<map>
 #include<sstream>
 #include"process.h"
+#include<unordered_map>
 
 using namespace std;
 
@@ -39,6 +40,7 @@ struct Memory{//内存管理结构体
     vector<pNode> phyBlock;//物理内存  对应的virid为-1表示没有
     int remain=16;//剩余物理内存
     queue<int> q;//FIFO队列
+    map<int,struct Process*> *mpid;
 
     Memory();
     
@@ -49,7 +51,7 @@ struct Memory{//内存管理结构体
     void loadVirBlock(int virid,int phyid,struct Process& proc);
     void setProcessId(int phyid,int processid);
 
-    int getOneBlock();
+    virtual int getOneBlock();
     void displayPhyBlock();
 
     void destroyVirBlock(int id);
@@ -63,5 +65,39 @@ struct Memory{//内存管理结构体
     void displayVirtualBlock(Process& proc);
 
     int getFreeVirPos(Process& proc);
+};
+
+struct FIFOMemory:Memory{
+    int getOneBlock();
+};
+
+
+struct LRUMemory:Memory{
+    list<pNode> cacheList;  // 双向链表用于维护页面访问顺序
+    unordered_map<int, list<pNode>::iterator> cacheMap;  // 哈希表用于快速查找页面
+    // int getOneBlock(){
+    //     int pblock;
+    //     if(cacheList.size()<PBLOCKNUM){
+    //         pblock=getFreeBlock();
+    //         cacheList.push_front(pblock);
+    //         cacheMap[pblock] = cacheList.begin();
+    //     }else{
+    //         pblock = cacheList.back();
+    //         cacheList.pop_back();
+    //         cacheMap.erase(pblock);
+    //     }
+        
+    //     // 将页面插入链表头部表示最新访问
+    //     cacheList.push_front(pblock);
+    //     cacheMap[pblock] = cacheList.begin();
+    // }
+};
+
+struct LFUMemory:Memory{
+    int getOneBlock();
+};
+
+struct MFUMemory:Memory{
+    int getOneBlock();
 };
 #endif

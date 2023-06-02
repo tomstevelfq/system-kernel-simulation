@@ -71,7 +71,10 @@ void Memory::displayPhyBlock(){
         if(phyBlock[i].virid==-1){
             cout<<"- ";
         }else{
-            cout<<phyBlock[i].processid<<"("<<phyBlock[i].virid<<")"<<" ";
+            cout<<phyBlock[i].processid<<"("<<(*mpid)[phyBlock[i].processid]->virtualId[phyBlock[i].virid]<<")"<<" ";
+        }
+        if((i+1)%4==0){
+            cout<<"|";
         }
     }
     cout<<endl;
@@ -123,6 +126,9 @@ void Memory::displayVirtualBlock(Process& proc){
         }else{
             cout<<"- ";
         }
+        if((i+1)%4==0){
+            cout<<"|";
+        }
     }
     cout<<endl;
 }
@@ -136,9 +142,17 @@ int Memory::getFreeVirPos(Process& proc){//虚表中的空闲位置
         return -1;
     }
 
-// void display(){
-//     displayVirtualBlock();
-//     displayPhyBlock();
-//     displayBlockTable();
-// }
+int FIFOMemory::getOneBlock(){
+    int freeblock=getFreeBlock();
+    if(freeblock==-1){//没有空闲就内存调度
+        int phyid=fifo();
+        int virid=phyBlock[phyid].virid;
+        phyBlock[phyid].virid=-1;//清物理表
+        //virtualTable[virid]=-1;//清虚表
+        q.push(phyid);
+        return phyid;
+    }
+    q.push(freeblock);
+    return freeblock;
+}
 

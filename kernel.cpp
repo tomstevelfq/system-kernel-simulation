@@ -49,17 +49,17 @@ void Kernel::releaseSize(int num,Process& proc){
 //     cout<<"schedule"<<endl;
 // }
 
-void Kernel::kernelPrint(string code,int counter,Process& proc,Cycle& cycle){
+void Kernel::kernelPrint(int counter,Process& proc,Cycle& cycle){
     cout<<"[cycle #"<<counter<<"]"<<endl;
     cout<<"1.mode: kernel"<<endl;
     cout<<"2.command: ";
     if(state==0){
-        state=1;
+        state=2;
         cout<<"boot"<<endl;
         cout<<"3.running: none"<<endl;
         proc.mem->displayPhyBlock();
     }else if(state==1){
-        state=1;
+        state=2;
         cout<<"system call"<<endl;
         cout<<"3.running: none"<<endl;
         proc.mem->displayPhyBlock();
@@ -71,7 +71,7 @@ void Kernel::kernelPrint(string code,int counter,Process& proc,Cycle& cycle){
     }else if(state==3){
         cout<<"idle"<<endl;
     }else if(state==4){
-        state=1;
+        state=2;
         cout<<"fault"<<endl;
         cout<<"3.running: none"<<endl;
         proc.mem->displayPhyBlock();
