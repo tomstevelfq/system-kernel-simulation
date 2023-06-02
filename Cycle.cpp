@@ -3,7 +3,7 @@
 #include <filesystem>
 
 Cycle::Cycle(){
-    mem=new FIFOMemory();
+    mem=new LRUMemory();
     kernel=new Kernel(mem);
     process=new Process(mem);
     mem->mpid=&mpid;

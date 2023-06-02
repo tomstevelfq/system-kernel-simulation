@@ -26,6 +26,8 @@ struct Node{
 
 struct pNode{
     pNode();
+    pNode(int i);
+    int id;
     int virid;
     int processid;
 };
@@ -78,23 +80,15 @@ struct FIFOMemory:Memory{
 
 struct LRUMemory:Memory{
     list<pNode> cacheList;  // 双向链表用于维护页面访问顺序
-    unordered_map<int, list<pNode>::iterator> cacheMap;  // 哈希表用于快速查找页面
-    // int getOneBlock(){
-    //     int pblock;
-    //     if(cacheList.size()<PBLOCKNUM){
-    //         pblock=getFreeBlock();
-    //         cacheList.push_front(pblock);
-    //         cacheMap[pblock] = cacheList.begin();
-    //     }else{
-    //         pblock = cacheList.back();
-    //         cacheList.pop_back();
-    //         cacheMap.erase(pblock);
-    //     }
-        
-    //     // 将页面插入链表头部表示最新访问
-    //     cacheList.push_front(pblock);
-    //     cacheMap[pblock] = cacheList.begin();
-    // }
+    map<int, list<pNode>::iterator> cacheMap;  // 哈希表用于快速查找页面
+    int getOneBlock();
+    LRUMemory();
+    int getFreeBlock();
+    void loadVirBlock(int virid,int phyid,Process& proc);
+    void setProcessId(int phyid,int processid);
+    void displayPhyBlock();
+    void destroyVirBlock(int id);
+    int getVirid(int id);
 };
 
 struct LFUMemory:Memory{
