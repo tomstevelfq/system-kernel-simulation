@@ -23,19 +23,17 @@ pNode::pNode(){
     processid=-1;
 }
 
-Memory::Memory(){
+FIFOMemory::FIFOMemory(){
     phyBlock=vector<pNode>(PBLOCKNUM,pNode());//物理块到虚拟块的映射
-    virtualTable=vector<int>(VBLOCKNUM,-1);//虚拟块到物理块的映射 为-1表示没有
-    virtualId=vector<int>(VBLOCKNUM,-1);
 }
 
-int Memory::fifo(){//分配一个fifo块
+int FIFOMemory::fifo(){//分配一个fifo块
     int ret=q.front();
     q.pop();
     return ret;
 }
 
-int Memory::getFreeBlock(){//获取一块空闲物理内存
+int FIFOMemory::getFreeBlock(){//获取一块空闲物理内存
     for(int i=0;i<phyBlock.size();i++){
         if(phyBlock[i].virid==-1){
             return i;
@@ -44,28 +42,15 @@ int Memory::getFreeBlock(){//获取一块空闲物理内存
     return -1;
 }
 
-void Memory::loadVirBlock(int virid,int phyid,Process& proc){//载入虚存到物理存
+void FIFOMemory::loadVirBlock(int virid,int phyid,Process& proc){//载入虚存到物理存
     phyBlock[phyid].virid=virid;
     proc.virtualTable[virid].phy_id=phyid;
 }
-void Memory::setProcessId(int phyid,int processid){//物理内存所属进程号
+void FIFOMemory::setProcessId(int phyid,int processid){//物理内存所属进程号
     phyBlock[phyid].processid=processid;
 }
 
-int Memory::getOneBlock(){//物理内存分配
-    int freeblock=getFreeBlock();
-    if(freeblock==-1){//没有空闲就内存调度
-        int phyid=fifo();
-        int virid=phyBlock[phyid].virid;
-        phyBlock[phyid].virid=-1;//清物理表
-        //virtualTable[virid]=-1;//清虚表
-        q.push(phyid);
-        return phyid;
-    }
-    q.push(freeblock);
-    return freeblock;
-}
-void Memory::displayPhyBlock(){
+void FIFOMemory::displayPhyBlock(){
     cout<<"4.physical memory:"<<endl;
     for(int i=0;i<16;i++){
         if(phyBlock[i].virid==-1){
@@ -80,10 +65,14 @@ void Memory::displayPhyBlock(){
     cout<<endl;
 }
 
-void Memory::destroyVirBlock(int id){//删除一块虚存
+void FIFOMemory::destroyVirBlock(int id){//删除一块虚存
     if(id!=-1){
         phyBlock[id].virid=-1;//清除占用
     }
+}
+
+int FIFOMemory::getVirid(int id){
+    return phyBlock[id].virid;
 }
 
 void Memory::releaseVirtualBlock(int virid,struct Process& process){

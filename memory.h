@@ -35,26 +35,20 @@ struct Memory{//内存管理结构体
     int vir_counter=0;//从0开始
     int curProcess=0;//当前进程号
     map<int,set<int>> alloc;//alloc id集合   键为alloc id值为分配的虚拟内存id集合
-    vector<int> virtualTable;//虚拟内存表
-    vector<int> virtualId;//虚拟编号表
-    vector<pNode> phyBlock;//物理内存  对应的virid为-1表示没有
     int remain=16;//剩余物理内存
-    queue<int> q;//FIFO队列
     map<int,struct Process*> *mpid;
 
-    Memory();
-    
-    int fifo();
+    virtual int getFreeBlock()=0;
 
-    int getFreeBlock();
+    virtual void loadVirBlock(int virid,int phyid,struct Process& proc)=0;
+    virtual void setProcessId(int phyid,int processid)=0;
 
-    void loadVirBlock(int virid,int phyid,struct Process& proc);
-    void setProcessId(int phyid,int processid);
+    virtual int getOneBlock()=0;
+    virtual void displayPhyBlock()=0;
 
-    virtual int getOneBlock();
-    void displayPhyBlock();
+    virtual void destroyVirBlock(int id)=0;
 
-    void destroyVirBlock(int id);
+    virtual int getVirid(int id)=0;
 
     void releaseVirtualBlock(int virid,struct Process& process);
 
@@ -68,7 +62,17 @@ struct Memory{//内存管理结构体
 };
 
 struct FIFOMemory:Memory{
+    queue<int> q;//FIFO队列
+    vector<pNode> phyBlock;//物理内存  对应的virid为-1表示没有
+    int getFreeBlock();
     int getOneBlock();
+    int fifo();
+    void loadVirBlock(int virid,int phyid,struct Process& proc);
+    void setProcessId(int phyid,int processid);
+    void displayPhyBlock();
+    void destroyVirBlock(int id);
+    int getVirid(int id);
+    FIFOMemory();
 };
 
 

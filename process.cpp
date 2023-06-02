@@ -16,7 +16,7 @@ void Process::displayBlockTable(){
         if(rw[i]==2){
             cout<<"- ";
         }else{
-            if(i==mem->phyBlock[virtualTable[i].phy_id].virid){
+            if(i==mem->getVirid(virtualTable[i].phy_id)){
                 cout<<virtualTable[i].phy_id<<" ";
             }else{
                 cout<<"- ";
@@ -71,7 +71,7 @@ pair<string,int> Process::excute(int counter){//执行完成返回false
             if(cmd1=="memory_read"){
                 ss>>blockid;
                 int phid=virtualTable[blockid].phy_id;
-                if(rw[blockid]!=2&&phid!=-1&&mem->phyBlock[phid].virid==blockid){
+                if(rw[blockid]!=2&&phid!=-1&&mem->getVirid(phid)==blockid){
                     cout<<"read ok"<<endl;
                     break;
                 }else{
@@ -155,7 +155,7 @@ bool Process::isDead(){
 void Process::destroyStorage(){
     for(int i=0;i<VBLOCKNUM;i++){
         if(rw[i]==1){
-            mem->phyBlock[virtualTable[i].phy_id].virid=-1;
+            mem->destroyVirBlock(virtualTable[i].phy_id);
         }
     }
 }
