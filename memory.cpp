@@ -11,9 +11,6 @@
 
 using namespace std;
 
-#define VBLOCKNUM 32
-#define PBLOCKNUM 16
-
 Node::Node(){
     phy_id=-1;
 }
@@ -96,6 +93,10 @@ int Memory::getFreeVirPos(Process& proc){//虚表中的空闲位置
     return -1;
 }
 
+void Memory::access(int phid){
+
+}
+
 int FIFOMemory::getOneBlock(){
     int freeblock=getFreeBlock();
     if(freeblock==-1){//没有空闲就内存调度
@@ -139,7 +140,7 @@ void FIFOMemory::setProcessId(int phyid,int processid){//物理内存所属进�
 
 void FIFOMemory::displayPhyBlock(){
     cout<<"4.physical memory:"<<endl;
-    for(int i=0;i<16;i++){
+    for(int i=0;i<PBLOCKNUM;i++){
         if(phyBlock[i].virid==-1){
             cout<<"- ";
         }else{
@@ -198,9 +199,17 @@ void LRUMemory::setProcessId(int phyid,int processid){//物理内存所属进程
     cacheMap[phyid]->processid=processid;
 }
 
+void LRUMemory::access(int phid){
+    auto &iter=cacheMap[phid];
+    auto it=*iter;
+    cacheList.erase(iter);
+    cacheList.push_front(it);
+    cacheMap[phid]=cacheList.begin();
+}
+
 void LRUMemory::displayPhyBlock(){
     cout<<"4.physical memory:"<<endl;
-    for(int i=0;i<16;i++){
+    for(int i=0;i<PBLOCKNUM;i++){
         if(cacheMap.find(i)==cacheMap.end()){
             cout<<"- ";
         }else{
@@ -251,6 +260,19 @@ int LFUMemory::getOneBlock(){
     return pblock;
 }
 
+void LFUMemory::access(int phid){
+    auto &iter=cache[phid];
+    freqErase(iter,iter.frequency);
+    iter.frequency++;
+    freqAdd(iter,iter.frequency);
+}
+
+void LFUMemory::freqAdd(Page& page,int freq){
+    frequencyMap[freq].push_front(page.id);
+    page.frequencyIt=frequencyMap[freq].begin();
+    updateMinFre();
+}
+
 int LFUMemory::getFreeBlock(){
     for(int i=0;i<PBLOCKNUM;i++){
         if(cache.find(i)==cache.end()){
@@ -270,7 +292,7 @@ void LFUMemory::setProcessId(int phyid,int processid){//物理内存所属进程
 
 void LFUMemory::displayPhyBlock(){
     cout<<"4.physical memory:"<<endl;
-    for(int i=0;i<16;i++){
+    for(int i=0;i<PBLOCKNUM;i++){
         if(cache.find(i)==cache.end()){
             cout<<"- ";
         }else{
@@ -347,6 +369,18 @@ int MFUMemory::getFreeBlock(){
     return -1;
 }
 
+void MFUMemory::access(int phid){
+    auto &iter=cache[phid];
+    freqErase(iter,iter.frequency);
+    iter.frequency++;
+    freqAdd(iter,iter.frequency);
+}
+
+void MFUMemory::freqAdd(Page& page,int freq){
+    frequencyMap[freq].push_front(page.id);
+    page.frequencyIt=frequencyMap[freq].begin();
+}
+
 void MFUMemory::loadVirBlock(int virid,int phyid,Process& proc){//载入虚存到物理存
     cache[phyid].virid=virid;
     proc.virtualTable[virid].phy_id=phyid;
@@ -357,7 +391,7 @@ void MFUMemory::setProcessId(int phyid,int processid){//物理内存所属进程
 
 void MFUMemory::displayPhyBlock(){
     cout<<"4.physical memory:"<<endl;
-    for(int i=0;i<16;i++){
+    for(int i=0;i<PBLOCKNUM;i++){
         if(cache.find(i)==cache.end()){
             cout<<"- ";
         }else{

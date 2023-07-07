@@ -1,0 +1,4 @@
+memory_write 0
+memory_allocate 2
+memory_release 1
+exit

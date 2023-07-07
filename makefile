@@ -1,20 +1,20 @@
-CC=g++ -g
+CC=gcc -g
 RM=del
 target=project3
 Outputs=build\\
 ofile=$(Outputs)memory.o $(Outputs)process.o $(Outputs)test.o $(Outputs)kernel.o $(Outputs)cycle.o
 
 $(target):$(ofile)
-	$(CC) $(ofile) -o $(target)
+	$(CC) $(ofile) -lstdc++ -o $(target)
 $(Outputs)memory.o:memory.cpp
-	$(CC) memory.cpp -c -o $(Outputs)memory.o
+	$(CC) memory.cpp -c -lstdc++ -o $(Outputs)memory.o
 $(Outputs)process.o:process.cpp
-	$(CC) process.cpp -c -o $(Outputs)process.o
+	$(CC) process.cpp -c -lstdc++ -o $(Outputs)process.o
 $(Outputs)test.o:test.cpp
-	$(CC) test.cpp -c -o $(Outputs)test.o
+	$(CC) test.cpp -c -lstdc++ -o $(Outputs)test.o
 $(Outputs)kernel.o:kernel.cpp
-	$(CC) kernel.cpp -c -o $(Outputs)kernel.o
+	$(CC) kernel.cpp -c -lstdc++ -o $(Outputs)kernel.o
 $(Outputs)cycle.o:cycle.cpp
-	$(CC) cycle.cpp -c -o $(Outputs)cycle.o
+	$(CC) cycle.cpp -c -lstdc++ -o $(Outputs)cycle.o
 clean:
 	$(RM) $(ofile) $(target)

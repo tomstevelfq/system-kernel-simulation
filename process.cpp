@@ -73,6 +73,7 @@ pair<string,int> Process::excute(int counter){//执行完成返回false
                 int phid=virtualTable[blockid].phy_id;
                 if(rw[blockid]!=2&&phid!=-1&&mem->getVirid(phid)==blockid){
                     cout<<"read ok"<<endl;
+                    mem->access(phid);
                     break;
                 }else{
                     // int phy_id=mem->getOneBlock();
@@ -80,11 +81,14 @@ pair<string,int> Process::excute(int counter){//执行完成返回false
                     // mem->loadVirBlock(blockid,phy_id,*this);
                     // cout<<"分配读物理内存"<<endl;
                     // rw[blockid]=1;
+                    cout<<"fenpeidu"<<endl;
                     return {"read",blockid};
                 }
             }else if(cmd1=="memory_write"){
                 ss>>blockid;
                 if(rw[blockid]==1){
+                    int phid=virtualTable[blockid].phy_id;
+                    mem->access(phid);
                     cout<<"write ok"<<endl;
                     break;
                 }else{

@@ -14,9 +14,6 @@
 
 using namespace std;
 
-#define VBLOCKNUM 32
-#define PBLOCKNUM 16
-
 struct Process{
     static int idcounter;
     int state=1;//进程状态  1 2 3 4 5

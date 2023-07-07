@@ -13,7 +13,6 @@ Cycle::Cycle(string path,string replace){
   }else{
     mem=new MFUMemory();
   }
-    mem=new MFUMemory();
     kernel=new Kernel(mem);
     process=new Process(mem);
     mem->mpid=&mpid;

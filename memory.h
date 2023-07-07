@@ -37,7 +37,7 @@ struct Memory{//内存管理结构体
     int vir_counter=0;//从0开始
     int curProcess=0;//当前进程号
     map<int,set<int>> alloc;//alloc id集合   键为alloc id值为分配的虚拟内存id集合
-    int remain=16;//剩余物理内存
+    int remain=PBLOCKNUM;//剩余物理内存
     map<int,struct Process*> *mpid;
 
     virtual int getFreeBlock()=0;
@@ -61,6 +61,8 @@ struct Memory{//内存管理结构体
     void displayVirtualBlock(Process& proc);
 
     int getFreeVirPos(Process& proc);
+
+    virtual void access(int phid);
 };
 
 struct FIFOMemory:Memory{
@@ -89,6 +91,7 @@ struct LRUMemory:Memory{
     void displayPhyBlock();
     void destroyVirBlock(int id);
     int getVirid(int id);
+    void access(int phid);
 };
 
 struct Page {
@@ -116,6 +119,8 @@ struct LFUMemory:Memory{
     int getVirid(int id);
     void freqErase(Page& page,int freq);
     void updateMinFre();
+    void access(int phid);
+    void freqAdd(Page& page,int freq);
 };
 
 struct MFUMemory:Memory{
@@ -130,5 +135,7 @@ struct MFUMemory:Memory{
     void destroyVirBlock(int id);
     int getVirid(int id);
     void freqErase(Page& page,int freq);
+    void access(int phid);
+    void freqAdd(Page& page,int freq);
 };
 #endif
