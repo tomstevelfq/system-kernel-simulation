@@ -29,6 +29,17 @@ pNode::pNode(int i){
     processid=-1;
 }
 
+Page::Page(int k, const std::list<int>::iterator& it)
+        : id(k), frequency(0), frequencyIt(it) {
+    virid=-1;
+    processid=-1;
+}
+
+Page::Page(){
+    virid=-1;
+    processid=-1;
+}
+
 void Memory::releaseVirtualBlock(int virid,struct Process& process){
     int phy_id=process.virtualTable[virid].phy_id;
     process.virtualTable[virid].phy_id=-1;
@@ -219,4 +230,90 @@ int LRUMemory::getVirid(int id){
     }
 }
 
+int LFUMemory::getOneBlock(){
+    int pblock;
+    if(cache.size()<PBLOCKNUM){
+        pblock=getFreeBlock();
+    }else{
+        auto& pageList = frequencyMap[minFrequency];
+        pblock = pageList.back();
+        pageList.pop_back();
+        cache.erase(pblock);
+        if (pageList.empty()) {
+            frequencyMap.erase(minFrequency);
+        }
+    }
+    
+    // 插入新的页面到频率为1的列表中
+    frequencyMap[1].push_front(pblock);
+    cache[pblock] = {pblock, frequencyMap[1].begin()};
+    minFrequency = 1;
+    return pblock;
+}
 
+int LFUMemory::getFreeBlock(){
+    for(int i=0;i<PBLOCKNUM;i++){
+        if(cache.find(i)==cache.end()){
+            return i;
+        }
+    }
+    return -1;
+}
+
+void LFUMemory::loadVirBlock(int virid,int phyid,Process& proc){//载入虚存到物理存
+    cache[phyid].virid=virid;
+    proc.virtualTable[virid].phy_id=phyid;
+}
+void LFUMemory::setProcessId(int phyid,int processid){//物理内存所属进程号
+    cache[phyid].processid=processid;
+}
+
+void LFUMemory::displayPhyBlock(){
+    cout<<"4.physical memory:"<<endl;
+    for(int i=0;i<16;i++){
+        if(cache.find(i)==cache.end()){
+            cout<<"- ";
+        }else{
+            cout<<cache[i].processid<<"("<<(*mpid)[cache[i].processid]->virtualId[cache[i].virid]<<")"<<" ";
+        }
+        if((i+1)%4==0){
+            cout<<"|";
+        }
+    }
+    cout<<endl;
+}
+
+void LFUMemory::destroyVirBlock(int id){//删除一块虚存
+    if(id!=-1&&cache.find(id)!=cache.end()){
+        auto &iter=cache[id];
+        iter.virid=-1;
+        freqErase(iter,iter.frequency);
+        cache.erase(id);
+    }
+}
+
+int LFUMemory::getVirid(int id){
+    if(cache.find(id)==cache.end()){
+        return -1;
+    }else{
+        return cache[id].virid;
+    }
+}
+
+void LFUMemory::freqErase(Page& page,int freq){
+    frequencyMap[freq].erase(page.frequencyIt);
+    if(frequencyMap[freq].empty()){
+        frequencyMap.erase(freq);
+        if(minFrequency==freq){
+            updateMinFre();
+        }
+    }
+}
+
+void LFUMemory::updateMinFre(){
+    if(frequencyMap.empty()){
+        minFrequency=-1;
+    }else{
+        minFrequency=frequencyMap.begin()->first;
+    }
+}

@@ -91,11 +91,37 @@ struct LRUMemory:Memory{
     int getVirid(int id);
 };
 
+struct Page {
+    int id;
+    int virid;
+    int processid;
+    int frequency;
+    std::list<int>::iterator frequencyIt;
+
+    Page();
+    Page(int k, const std::list<int>::iterator& it);
+};
+
 struct LFUMemory:Memory{
+    int capacity=PBLOCKNUM;
+    int minFrequency=0;
+    std::map<int, Page> cache;
+    std::map<int, std::list<int>> frequencyMap;
     int getOneBlock();
+    int getFreeBlock();
+    void loadVirBlock(int virid,int phyid,Process& proc);
+    void setProcessId(int phyid,int processid);
+    void displayPhyBlock();
+    void destroyVirBlock(int id);
+    int getVirid(int id);
+    void freqErase(Page& page,int freq);
+    void updateMinFre();
 };
 
 struct MFUMemory:Memory{
+    int capacity=PBLOCKNUM;
+    map<int, Page> cache;
+    map<int, std::list<int>> frequencyMap;
     int getOneBlock();
 };
 #endif
