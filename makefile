@@ -1,6 +1,6 @@
 CC=g++ -g
 RM=del
-target=main.exe
+target=project3
 Outputs=build\\
 ofile=$(Outputs)memory.o $(Outputs)process.o $(Outputs)test.o $(Outputs)kernel.o $(Outputs)cycle.o
 

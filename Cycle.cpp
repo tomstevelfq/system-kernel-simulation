@@ -2,7 +2,17 @@
 #include<fstream>
 #include <filesystem>
 
-Cycle::Cycle(){
+Cycle::Cycle(string path,string replace){
+  this->path=path;
+  if(replace=="fifo"){
+    mem=new FIFOMemory();
+  }else if(replace=="lru"){
+    mem=new LRUMemory();
+  }else if(replace=="lfu"){
+    mem=new LFUMemory();
+  }else{
+    mem=new MFUMemory();
+  }
     mem=new MFUMemory();
     kernel=new Kernel(mem);
     process=new Process(mem);
@@ -11,7 +21,7 @@ Cycle::Cycle(){
 
 void Cycle::init(){
   //读文件里面的代码
-  string path="test";
+  //string path="test";
   for(const auto& file:filesystem::directory_iterator(path)){
     ifstream ifile(file.path());
     string name=file.path().filename().string();

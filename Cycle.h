@@ -9,6 +9,7 @@
 using namespace std;
 
 struct Cycle{//调度器
+    string path;
     int cycleCounter=0;
     struct Memory *mem;
     struct Kernel *kernel;
@@ -17,7 +18,7 @@ struct Cycle{//调度器
     map<int,struct Process*> mpid;
     queue<Process*> q;//就绪队列
     int state=1;//0用户态  1kernel态
-    Cycle();
+    Cycle(string path,string replace);
     void start();
     void init();
     void cyclePrint(struct Process& proc);
