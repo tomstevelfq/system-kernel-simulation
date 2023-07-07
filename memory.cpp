@@ -317,3 +317,80 @@ void LFUMemory::updateMinFre(){
         minFrequency=frequencyMap.begin()->first;
     }
 }
+
+int MFUMemory::getOneBlock(){
+    int pblock;
+    if(cache.size()<PBLOCKNUM){
+        pblock=getFreeBlock();
+    }else{
+        auto& pageList = frequencyMap.rbegin()->second;
+        pblock = pageList.back();
+        pageList.pop_back();
+        cache.erase(pblock);
+        if (pageList.empty()) {
+            frequencyMap.erase(frequencyMap.rbegin()->first);
+        }
+    }
+    
+    // 插入新的页面到频率为1的列表中
+    frequencyMap[1].push_front(pblock);
+    cache[pblock] = {pblock, frequencyMap[1].begin()};
+    return pblock;
+}
+
+int MFUMemory::getFreeBlock(){
+    for(int i=0;i<PBLOCKNUM;i++){
+        if(cache.find(i)==cache.end()){
+            return i;
+        }
+    }
+    return -1;
+}
+
+void MFUMemory::loadVirBlock(int virid,int phyid,Process& proc){//载入虚存到物理存
+    cache[phyid].virid=virid;
+    proc.virtualTable[virid].phy_id=phyid;
+}
+void MFUMemory::setProcessId(int phyid,int processid){//物理内存所属进程号
+    cache[phyid].processid=processid;
+}
+
+void MFUMemory::displayPhyBlock(){
+    cout<<"4.physical memory:"<<endl;
+    for(int i=0;i<16;i++){
+        if(cache.find(i)==cache.end()){
+            cout<<"- ";
+        }else{
+            cout<<cache[i].processid<<"("<<(*mpid)[cache[i].processid]->virtualId[cache[i].virid]<<")"<<" ";
+        }
+        if((i+1)%4==0){
+            cout<<"|";
+        }
+    }
+    cout<<endl;
+}
+
+void MFUMemory::destroyVirBlock(int id){//删除一块虚存
+    if(id!=-1&&cache.find(id)!=cache.end()){
+        auto &iter=cache[id];
+        iter.virid=-1;
+        freqErase(iter,iter.frequency);
+        cache.erase(id);
+    }
+}
+
+int MFUMemory::getVirid(int id){
+    if(cache.find(id)==cache.end()){
+        return -1;
+    }else{
+        return cache[id].virid;
+    }
+}
+
+void MFUMemory::freqErase(Page& page,int freq){
+    frequencyMap[freq].erase(page.frequencyIt);
+    if(frequencyMap[freq].empty()){
+        frequencyMap.erase(freq);
+    }
+}
+

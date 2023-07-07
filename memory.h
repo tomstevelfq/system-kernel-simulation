@@ -123,5 +123,12 @@ struct MFUMemory:Memory{
     map<int, Page> cache;
     map<int, std::list<int>> frequencyMap;
     int getOneBlock();
+    int getFreeBlock();
+    void loadVirBlock(int virid,int phyid,Process& proc);
+    void setProcessId(int phyid,int processid);
+    void displayPhyBlock();
+    void destroyVirBlock(int id);
+    int getVirid(int id);
+    void freqErase(Page& page,int freq);
 };
 #endif

@@ -1,0 +1,29 @@
+[cycle #0]
+1.mode: kernel
+2.command: boot
+3.running: none
+4.physical memory:
+- - - - |- - - - |- - - - |- - - - |
+[cycle #1]
+1.mode: kernel
+2.command: schedule
+running: 1(init,0)
+4.physical memory:
+- - - - |- - - - |- - - - |- - - - |
+5.virtual memory:
+- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |
+6.page table:
+- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |
+- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |
+[cycle #2]
+1.mode: user
+2.comand: memory_allocate 16
+3.running: 1(init,0)
+4.physical memory:
+- - - - |- - - - |- - - - |- - - - |
+5.virtual memory:
+- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |
+6.page table:
+- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |
+- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |- - - - |
+分配内存

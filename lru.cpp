@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <list>
 
-class LFU {
+class MFU {
 private:
     struct Page {
         int key;
@@ -15,12 +15,11 @@ private:
     };
 
     int capacity;
-    int minFrequency;
     std::unordered_map<int, Page> cache;
     std::unordered_map<int, std::list<int>> frequencyMap;
 
 public:
-    LFU(int cap) : capacity(cap), minFrequency(0) {}
+    MFU(int cap) : capacity(cap) {}
 
     int get(int key) {
         if (cache.find(key) == cache.end()) {
@@ -35,9 +34,6 @@ public:
         frequencyMap[frequency].erase(page.frequencyIt);
         if (frequencyMap[frequency].empty()) {
             frequencyMap.erase(frequency);
-            if (minFrequency == frequency) {
-                ++minFrequency;
-            }
         }
 
         ++frequency;
@@ -60,34 +56,33 @@ public:
         }
 
         if (cache.size() >= capacity) {
-            // 达到缓存容量上限，淘汰最不经常使用的页面
-            auto& pageList = frequencyMap[minFrequency];
+            // 达到缓存容量上限，淘汰最经常使用的页面
+            auto& pageList = frequencyMap.rbegin()->second;
             int lastKey = pageList.back();
             pageList.pop_back();
             cache.erase(lastKey);
             if (pageList.empty()) {
-                frequencyMap.erase(minFrequency);
+                frequencyMap.erase(frequencyMap.rbegin()->first);
             }
         }
 
         // 插入新的页面到频率为1的列表中
         frequencyMap[1].push_front(key);
         cache[key] = {key, value, 1, frequencyMap[1].begin()};
-        minFrequency = 1;
     }
 };
 
 int main() {
-    LFU cache(2);  // 创建容量为2的LFU缓存
+    MFU cache(2);  // 创建容量为2的MFU缓存
 
     cache.put(1, 10);
     cache.put(2, 20);
 
     std::cout << cache.get(1) << std::endl;  // 输出: 10
 
-    cache.put(3, 30);  // 缓存已满，会淘汰访问频率最低的缓存项(2, 20)
+    cache.put(3, 30);  // 缓存已满，会淘汰访问频率最高的缓存项(1, 10)
 
-    std::cout << cache.get(2) << std::endl;  // 输出: -1
+    std::cout << cache.get(1) << std::endl;  // 输出: -1
 
     return 0;
 }
